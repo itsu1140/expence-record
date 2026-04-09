@@ -1,6 +1,6 @@
-from enum import Enum
-from datetime import date
 import uuid
+from datetime import date
+from enum import Enum
 
 from pydantic import BaseModel, Field
 
@@ -29,7 +29,9 @@ class RecurringItem(BaseModel):
     type: EntryType
     active: bool = True
     start_month: int = 1
-    end_month: int | None = None  # None = no expiry; set when item is superseded by a newer version
+    end_month: int | None = (
+        None  # None = no expiry; set when item is superseded by a newer version
+    )
 
 
 class Group(BaseModel):

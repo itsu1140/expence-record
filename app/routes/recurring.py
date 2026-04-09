@@ -3,9 +3,11 @@ from fastapi import APIRouter, HTTPException
 from app.models import CreateRecurring, RecurringItem
 from app.storage import load_year, save_year
 
+
 # Helper to check if month is in the valid range of a recurring item
 def _in_range(r: RecurringItem, month: int) -> bool:
     return r.start_month <= month and (r.end_month is None or r.end_month >= month)
+
 
 router = APIRouter(prefix="/api/{year}/recurring", tags=["recurring"])
 
@@ -25,8 +27,11 @@ def create_recurring(year: int, body: CreateRecurring) -> RecurringItem:
 
 
 @router.put("/{item_id}/from/{month}")
-def update_recurring_from_month(year: int, item_id: str, month: int, body: CreateRecurring) -> RecurringItem:
-    """Update a recurring item starting from the given month.
+def update_recurring_from_month(
+    year: int, item_id: str, month: int, body: CreateRecurring
+) -> RecurringItem:
+    """
+    Update a recurring item starting from the given month.
 
     - If month <= item.start_month: update in place (no past months to protect).
     - Otherwise: cap the old item at end_month=month-1 and create a new item
@@ -41,12 +46,14 @@ def update_recurring_from_month(year: int, item_id: str, month: int, body: Creat
         # No history to protect — update in place
         for i, r in enumerate(data.recurring):
             if r.id == item_id:
-                data.recurring[i] = r.model_copy(update={
-                    "name": body.name,
-                    "amount": body.amount,
-                    "category": body.category,
-                    "type": body.type,
-                })
+                data.recurring[i] = r.model_copy(
+                    update={
+                        "name": body.name,
+                        "amount": body.amount,
+                        "category": body.category,
+                        "type": body.type,
+                    }
+                )
                 save_year(data)
                 return data.recurring[i]
 
@@ -69,7 +76,9 @@ def update_recurring_from_month(year: int, item_id: str, month: int, body: Creat
     # Transfer group membership from old item to new item
     for g in data.recurring_groups:
         if item_id in g.recurring_ids:
-            g.recurring_ids = [new_item.id if rid == item_id else rid for rid in g.recurring_ids]
+            g.recurring_ids = [
+                new_item.id if rid == item_id else rid for rid in g.recurring_ids
+            ]
 
     save_year(data)
     return new_item
@@ -80,13 +89,15 @@ def update_recurring(year: int, item_id: str, body: CreateRecurring) -> Recurrin
     data = load_year(year)
     for i, r in enumerate(data.recurring):
         if r.id == item_id:
-            updated = r.model_copy(update={
-                "name": body.name,
-                "amount": body.amount,
-                "category": body.category,
-                "type": body.type,
-                # start_month preserved; not overwritten on edit
-            })
+            updated = r.model_copy(
+                update={
+                    "name": body.name,
+                    "amount": body.amount,
+                    "category": body.category,
+                    "type": body.type,
+                    # start_month preserved; not overwritten on edit
+                }
+            )
             data.recurring[i] = updated
             save_year(data)
             return updated

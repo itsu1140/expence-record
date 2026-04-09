@@ -51,9 +51,7 @@ def restore_data(year: int, body: YearData) -> None:
 def get_year_summary(year: int) -> dict:
     data = load_year(year)
 
-    monthly: dict[int, dict] = {
-        m: {"income": 0, "expense": 0} for m in range(1, 13)
-    }
+    monthly: dict[int, dict] = {m: {"income": 0, "expense": 0} for m in range(1, 13)}
 
     for entry in data.entries:
         monthly[entry.date.month][entry.type.value] += entry.amount
@@ -90,8 +88,11 @@ def get_month_summary(year: int, month: int) -> dict:
     data = load_year(year)
     entries = [e for e in data.entries if e.date.month == month]
     active_recurring = [
-        r for r in data.recurring
-        if r.active and r.start_month <= month and (r.end_month is None or r.end_month >= month)
+        r
+        for r in data.recurring
+        if r.active
+        and r.start_month <= month
+        and (r.end_month is None or r.end_month >= month)
     ]
 
     categories: dict[str, dict] = {}
@@ -125,7 +126,5 @@ def get_month_summary(year: int, month: int) -> dict:
         "recurring_expense": recurring_totals["expense"],
         "entry_income": entry_income,
         "entry_expense": entry_expense,
-        "categories": [
-            {"category": cat, **vals} for cat, vals in categories.items()
-        ],
+        "categories": [{"category": cat, **vals} for cat, vals in categories.items()],
     }

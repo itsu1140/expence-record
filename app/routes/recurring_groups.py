@@ -1,6 +1,11 @@
 from fastapi import APIRouter, HTTPException
 
-from app.models import CreateRecurringGroup, RecurringGroup, ReorderIds, UpdateRecurringGroup
+from app.models import (
+    CreateRecurringGroup,
+    RecurringGroup,
+    ReorderIds,
+    UpdateRecurringGroup,
+)
 from app.storage import load_year, save_year
 
 router = APIRouter(prefix="/api/{year}/recurring-groups", tags=["recurring-groups"])
@@ -29,7 +34,11 @@ def reorder_recurring_groups(year: int, body: ReorderIds) -> None:
 
 
 @router.put("/{group_id}")
-def update_recurring_group(year: int, group_id: str, body: UpdateRecurringGroup) -> RecurringGroup:
+def update_recurring_group(
+    year: int,
+    group_id: str,
+    body: UpdateRecurringGroup,
+) -> RecurringGroup:
     data = load_year(year)
     for i, g in enumerate(data.recurring_groups):
         if g.id == group_id:

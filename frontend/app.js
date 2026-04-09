@@ -86,7 +86,7 @@ const api = {
 };
 
 // ─── Data Loading ─────────────────────────────────────────────────────────────
-const MONTHS = ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
+const MONTHS = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
 
 async function loadYearList() {
   const years = await api.get("/api/years");
@@ -271,10 +271,6 @@ function renderEntries() {
       state.editingEntryId === e.id ? createEntryEditCard(e) : createEntryViewCard(e)
     );
   });
-
-  if (state.entries.length === 0 && state.editingEntryId !== "new") {
-    list.innerHTML = '<div class="empty-state">📋<p>明細がありません<br><small>「+ 追加 (N)」で追加できます</small></p></div>';
-  }
 }
 
 function createTypeToggle(isIncome) {
@@ -394,6 +390,13 @@ function createEntryEditCard(entry) {
   dateInput.value = defaultDate;
   row.appendChild(dateInput);
 
+  const descInput = document.createElement("input");
+  descInput.className = "edit-desc";
+  descInput.type = "text";
+  descInput.placeholder = "内容";
+  descInput.value = entry?.description || "";
+  row.appendChild(descInput);
+
   const amountInput = document.createElement("input");
   amountInput.className = "edit-amount";
   amountInput.type = "number";
@@ -401,13 +404,6 @@ function createEntryEditCard(entry) {
   amountInput.placeholder = "金額";
   amountInput.value = entry?.amount || "";
   row.appendChild(amountInput);
-
-  const descInput = document.createElement("input");
-  descInput.className = "edit-desc";
-  descInput.type = "text";
-  descInput.placeholder = "内容";
-  descInput.value = entry?.description || "";
-  row.appendChild(descInput);
 
   const saveBtn = document.createElement("button");
   saveBtn.className = "edit-save";
@@ -459,7 +455,7 @@ function createEntryEditCard(entry) {
     if (e.key === "Escape") cancel();
   });
 
-  if (!entry) setTimeout(() => amountInput.focus(), 30);
+  if (!entry) setTimeout(() => descInput.focus(), 30);
   return li;
 }
 
@@ -667,9 +663,9 @@ function renderRecurring() {
     return;
   }
 
-  // Hide items superseded by a newer version (end_month < current month)
+  // Hide items not yet started or superseded by a newer version
   const visible = state.recurring.filter(
-    (r) => r.end_month == null || r.end_month >= state.month
+    (r) => r.start_month <= state.month && (r.end_month == null || r.end_month >= state.month)
   );
   const groupedIds = new Set(state.recurringGroups.flatMap((g) => g.recurring_ids));
   const ungrouped = visible.filter((r) => !groupedIds.has(r.id));
@@ -855,7 +851,7 @@ function createRecurringEditCard(item) {
     if (e.key === "Escape") cancel();
   });
 
-  if (!item) setTimeout(() => amountInput.focus(), 30);
+  if (!item) setTimeout(() => nameInput.focus(), 30);
   return li;
 }
 
