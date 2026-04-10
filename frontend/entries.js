@@ -178,9 +178,13 @@ function createEntryEditCard(entry) {
 
     li.appendChild(row);
 
+    let saving = false;
     const save = async () => {
+        if (saving) return;
+        saving = true;
         const amount = parseInt(amountInput.value, 10);
         if (!amount || amount <= 0) {
+            saving = false;
             amountInput.classList.add("input-error");
             amountInput.focus();
             setTimeout(() => amountInput.classList.remove("input-error"), 600);
@@ -216,6 +220,7 @@ function createEntryEditCard(entry) {
     li.addEventListener("focusout", (e) => {
         if (li.contains(e.relatedTarget)) return;
         if (e.relatedTarget === cancelBtn) return;
+        if (e.relatedTarget === saveBtn) return;
         save();
     });
 
