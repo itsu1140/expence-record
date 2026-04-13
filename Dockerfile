@@ -16,6 +16,6 @@ COPY frontend/ ./frontend/
 # Data directory (overridden by volume in production)
 RUN mkdir -p /app/data
 
-EXPOSE 8001
+EXPOSE 50001
 
-CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "50001"]

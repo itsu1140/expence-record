@@ -2,7 +2,7 @@ services:
   app:
     build: .
     ports:
-      - "8000:8000"
+      - "50001:50001"
     volumes:
       - ./data:/app/data
     restart: unless-stopped

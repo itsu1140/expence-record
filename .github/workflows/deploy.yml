@@ -36,6 +36,6 @@ jobs:
             docker run -d \
               --name expence-record \
               --restart unless-stopped \
-              -p 8001:8001 \
+              -p 50001:50001 \
               -v ${{ secrets.DATA_DIR }}:/app/data \
               ${{ secrets.DOCKERHUB_USERNAME }}/expence-record:latest
