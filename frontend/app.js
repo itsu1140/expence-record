@@ -99,6 +99,15 @@ async function init() {
         renderRecurring();
     });
 
+    const monthListHeader = document.getElementById("month-list-header");
+    const monthListEl = document.getElementById("month-list");
+    const monthChevron = document.getElementById("month-list-chevron");
+    monthListHeader.addEventListener("click", () => {
+        const isOpen = monthListEl.style.display !== "none";
+        monthListEl.style.display = isOpen ? "none" : "";
+        monthChevron.textContent = isOpen ? "▶" : "▼";
+    });
+
     document.getElementById("new-year-btn").addEventListener("click", addNewYear);
     document.getElementById("year-select").addEventListener("change", (e) => changeYear(e.target.value));
 
