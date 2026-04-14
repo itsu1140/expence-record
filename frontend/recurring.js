@@ -387,18 +387,23 @@ async function reorderRecurringGroups(draggedId, targetId) {
 
 async function deleteRecurring(id) {
     if (!confirm("この固定費を削除しますか？")) return;
+    const item = state.recurring.find((r) => r.id === id);
+    const isFullDelete = item && state.month <= item.start_month;
     await withHistory(async () => {
-        for (const g of state.recurringGroups) {
-            if (g.recurring_ids.includes(id)) {
-                const remaining = g.recurring_ids.filter((rid) => rid !== id);
-                if (remaining.length === 0) {
-                    await api.del(`/api/${state.year}/recurring-groups/${g.id}`);
-                } else {
-                    await api.put(`/api/${state.year}/recurring-groups/${g.id}`, { name: g.name, recurring_ids: remaining });
+        // グループ整理は完全削除のときのみ（履歴として残す場合はグループ所属を維持）
+        if (isFullDelete) {
+            for (const g of state.recurringGroups) {
+                if (g.recurring_ids.includes(id)) {
+                    const remaining = g.recurring_ids.filter((rid) => rid !== id);
+                    if (remaining.length === 0) {
+                        await api.del(`/api/${state.year}/recurring-groups/${g.id}`);
+                    } else {
+                        await api.put(`/api/${state.year}/recurring-groups/${g.id}`, { name: g.name, recurring_ids: remaining });
+                    }
                 }
             }
         }
-        await api.del(`/api/${state.year}/recurring/${id}`);
+        await api.del(`/api/${state.year}/recurring/${id}/from/${state.month}`);
     });
     state.recurring = await api.get(`/api/${state.year}/recurring`);
     state.recurringGroups = await api.get(`/api/${state.year}/recurring-groups`);

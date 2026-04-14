@@ -115,6 +115,29 @@ def toggle_recurring(year: int, item_id: str) -> RecurringItem:
     raise HTTPException(status_code=404, detail="Recurring item not found")
 
 
+@router.delete("/{item_id}/from/{month}", status_code=204)
+def delete_recurring_from_month(year: int, item_id: str, month: int) -> None:
+    """
+    Delete a recurring item starting from the given month.
+
+    - If month <= item.start_month: full delete (item never applied before this month).
+    - Otherwise: set end_month = month - 1 to preserve history.
+    """
+    data = load_year(year)
+    item = next((r for r in data.recurring if r.id == item_id), None)
+    if item is None:
+        raise HTTPException(status_code=404, detail="Recurring item not found")
+
+    if month <= item.start_month:
+        data.recurring = [r for r in data.recurring if r.id != item_id]
+    else:
+        for i, r in enumerate(data.recurring):
+            if r.id == item_id:
+                data.recurring[i] = r.model_copy(update={"end_month": month - 1})
+                break
+    save_year(data)
+
+
 @router.delete("/{item_id}", status_code=204)
 def delete_recurring(year: int, item_id: str) -> None:
     data = load_year(year)
