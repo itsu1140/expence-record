@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>明細管理</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="__ROOT_PATH__/static/style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -65,13 +65,14 @@
     </div>
   </div>
 
-  <script src="/static/api.js"></script>
-  <script src="/static/state.js"></script>
-  <script src="/static/data.js"></script>
-  <script src="/static/sidebar.js"></script>
-  <script src="/static/entries.js"></script>
-  <script src="/static/recurring.js"></script>
-  <script src="/static/charts.js"></script>
-  <script src="/static/app.js"></script>
+  <script>window.ROOT_PATH = "__ROOT_PATH__";</script>
+  <script src="__ROOT_PATH__/static/api.js"></script>
+  <script src="__ROOT_PATH__/static/state.js"></script>
+  <script src="__ROOT_PATH__/static/data.js"></script>
+  <script src="__ROOT_PATH__/static/sidebar.js"></script>
+  <script src="__ROOT_PATH__/static/entries.js"></script>
+  <script src="__ROOT_PATH__/static/recurring.js"></script>
+  <script src="__ROOT_PATH__/static/charts.js"></script>
+  <script src="__ROOT_PATH__/static/app.js"></script>
 </body>
 </html>
