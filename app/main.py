@@ -17,7 +17,7 @@ app.include_router(groups.router)
 app.include_router(recurring_groups.router)
 app.include_router(summary.router)
 
-FRONTEND_DIR = Path("frontend")
+FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
 
 _INDEX_TEMPLATE = (FRONTEND_DIR / "index.html").read_text()

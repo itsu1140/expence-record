@@ -37,6 +37,6 @@ jobs:
               --name expence-record \
               --restart unless-stopped \
               -p 50001:50001 \
-              -v ${{ secrets.DATA_DIR }}:/app/data \
               -e ROOT_PATH=/expence-record \
+              -v ${{ secrets.DATA_DIR }}:/app/data \
               ${{ secrets.DOCKERHUB_USERNAME }}/expence-record:latest
