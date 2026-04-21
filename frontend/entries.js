@@ -25,7 +25,29 @@ function renderEntries() {
         list.appendChild(createGroupCard(g, groupEntries));
     });
 
+    // Virtual tag groups for ungrouped entries
+    const tagOrder = [];
+    const tagGroupMap = {};
+    const noTag = [];
     ungrouped.forEach((e) => {
+        if (e.tags && e.tags.length > 0) {
+            const tag = e.tags[0];
+            if (!tagGroupMap[tag]) {
+                tagGroupMap[tag] = [];
+                tagOrder.push(tag);
+            }
+            tagGroupMap[tag].push(e);
+        } else {
+            noTag.push(e);
+        }
+    });
+
+    tagOrder.forEach((tag) => {
+        const entries = tagGroupMap[tag].sort((a, b) => a.date.localeCompare(b.date));
+        list.appendChild(createTagGroupCard(tag, entries));
+    });
+
+    noTag.forEach((e) => {
         list.appendChild(
             state.editingEntryId === e.id ? createEntryEditCard(e) : createEntryViewCard(e)
         );
@@ -45,7 +67,7 @@ function createTypeToggle(isIncome) {
             btn.classList.add("active");
         });
         btn.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") e.preventDefault(); // let bubble → li save handler
+            if (e.key === "Enter") e.preventDefault();
             if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
                 e.preventDefault();
                 const btns = [...wrap.querySelectorAll(".type-btn")];
@@ -75,6 +97,18 @@ function createEntryViewCard(entry) {
     <span class="card-amount ${entry.type}">${sign}${entry.amount.toLocaleString()}円</span>
     <button class="card-del" title="削除 (Delete)">×</button>
   `;
+
+    if (entry.tags && entry.tags.length > 0) {
+        const tagsEl = document.createElement("div");
+        tagsEl.className = "card-tags";
+        entry.tags.forEach((tag) => {
+            const chip = document.createElement("span");
+            chip.className = "tag-chip";
+            chip.textContent = tag;
+            tagsEl.appendChild(chip);
+        });
+        li.insertBefore(tagsEl, li.querySelector(".card-date"));
+    }
 
     li.addEventListener("click", (e) => {
         if (e.target.classList.contains("card-del")) return;
@@ -136,6 +170,7 @@ function createEntryEditCard(entry) {
         entry?.date ||
         `${state.year}-${String(state.month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
     const isIncome = entry?.type === "income";
+    const pendingTags = [...(entry?.tags || [])];
 
     const row = document.createElement("div");
     row.className = "edit-row";
@@ -177,6 +212,7 @@ function createEntryEditCard(entry) {
     row.appendChild(cancelBtn);
 
     li.appendChild(row);
+    li.appendChild(createTagsEditRow(pendingTags));
 
     let saving = false;
     const save = async () => {
@@ -196,6 +232,7 @@ function createEntryEditCard(entry) {
             amount,
             description: descInput.value,
             category: "",
+            tags: pendingTags,
         };
         await withHistory(() =>
             entry
@@ -207,6 +244,7 @@ function createEntryEditCard(entry) {
     };
 
     const cancel = () => {
+        document.querySelector(".tag-picker")?.remove();
         state.editingEntryId = null;
         renderEntries();
     };
@@ -221,10 +259,177 @@ function createEntryEditCard(entry) {
         if (li.contains(e.relatedTarget)) return;
         if (e.relatedTarget === cancelBtn) return;
         if (e.relatedTarget === saveBtn) return;
+        if (document.querySelector(".tag-picker")) return;
         save();
     });
 
     if (!entry) setTimeout(() => descInput.focus(), 30);
+    return li;
+}
+
+// ─── Tag Edit UI ──────────────────────────────────────────────────────────────
+function createTagsEditRow(pendingTags) {
+    const row = document.createElement("div");
+    row.className = "edit-tags-row";
+
+    const addBtn = document.createElement("button");
+    addBtn.type = "button";
+    addBtn.className = "tag-add-btn";
+    addBtn.textContent = "+ タグ";
+    row.appendChild(addBtn);
+
+    function renderChips() {
+        row.querySelectorAll(".tag-chip").forEach((c) => c.remove());
+        pendingTags.forEach((tag, i) => {
+            const chip = document.createElement("span");
+            chip.className = "tag-chip removable";
+
+            const label = document.createElement("span");
+            label.textContent = tag;
+            chip.appendChild(label);
+
+            const rm = document.createElement("button");
+            rm.type = "button";
+            rm.className = "tag-chip-rm";
+            rm.textContent = "×";
+            rm.addEventListener("mousedown", (e) => {
+                e.preventDefault();
+                pendingTags.splice(i, 1);
+                renderChips();
+            });
+            chip.appendChild(rm);
+
+            row.insertBefore(chip, addBtn);
+        });
+    }
+
+    addBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        showTagPicker(addBtn, pendingTags, (tag) => {
+            if (tag && !pendingTags.includes(tag)) {
+                pendingTags.push(tag);
+                renderChips();
+            }
+        });
+    });
+
+    renderChips();
+    return row;
+}
+
+function showTagPicker(anchor, pendingTags, onAdd) {
+    document.querySelector(".tag-picker")?.remove();
+
+    const picker = document.createElement("div");
+    picker.className = "tag-picker";
+
+    const available = state.allTags.filter((t) => !pendingTags.includes(t));
+    if (available.length > 0) {
+        const list = document.createElement("div");
+        list.className = "tag-picker-list";
+        available.forEach((tag) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "tag-chip";
+            btn.textContent = tag;
+            btn.addEventListener("mousedown", (e) => {
+                e.preventDefault();
+                onAdd(tag);
+                closePicker();
+            });
+            list.appendChild(btn);
+        });
+        picker.appendChild(list);
+    }
+
+    const input = document.createElement("input");
+    input.className = "tag-picker-input";
+    input.placeholder = "新しいタグ名を入力...";
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            const val = input.value.trim();
+            if (val) onAdd(val);
+            closePicker();
+        }
+        if (e.key === "Escape") {
+            e.preventDefault();
+            closePicker();
+        }
+    });
+    picker.appendChild(input);
+
+    document.body.appendChild(picker);
+    const rect = anchor.getBoundingClientRect();
+    picker.style.top = `${rect.bottom + 4}px`;
+    picker.style.left = `${rect.left}px`;
+
+    function closePicker() {
+        picker.remove();
+        document.removeEventListener("mousedown", outsideClick);
+        anchor.focus();
+    }
+
+    function outsideClick(e) {
+        if (!picker.contains(e.target) && e.target !== anchor) {
+            closePicker();
+        }
+    }
+
+    document.addEventListener("mousedown", outsideClick);
+    requestAnimationFrame(() => input.focus());
+}
+
+// ─── Tag Group Card ───────────────────────────────────────────────────────────
+function createTagGroupCard(tag, entries) {
+    const li = document.createElement("li");
+    li.className = "group-card";
+    li.dataset.tagGroup = tag;
+
+    const total = entries.reduce(
+        (s, e) => s + (e.type === "income" ? e.amount : -e.amount), 0
+    );
+    const totalClass = total >= 0 ? "income" : "expense";
+    const totalStr = (total >= 0 ? "+" : "−") + Math.abs(total).toLocaleString() + "円";
+    const isCollapsed = state.collapsedTagGroups.has(tag);
+
+    const header = document.createElement("div");
+    header.className = "group-header";
+
+    const tagChip = document.createElement("span");
+    tagChip.className = "tag-chip";
+    tagChip.textContent = tag;
+    header.appendChild(tagChip);
+
+    const toggleBtn = document.createElement("button");
+    toggleBtn.className = "group-toggle-btn";
+    toggleBtn.textContent = isCollapsed ? "▶" : "▼";
+    header.appendChild(toggleBtn);
+
+    const totalEl = document.createElement("span");
+    totalEl.className = `group-total ${totalClass}`;
+    totalEl.textContent = totalStr;
+    header.appendChild(totalEl);
+
+    const body = document.createElement("ul");
+    body.className = "group-body";
+    if (isCollapsed) body.style.display = "none";
+    entries.forEach((e) => {
+        body.appendChild(
+            state.editingEntryId === e.id ? createEntryEditCard(e) : createEntryViewCard(e)
+        );
+    });
+
+    toggleBtn.addEventListener("click", () => {
+        const open = body.style.display !== "none";
+        body.style.display = open ? "none" : "";
+        toggleBtn.textContent = open ? "▶" : "▼";
+        if (open) state.collapsedTagGroups.add(tag);
+        else state.collapsedTagGroups.delete(tag);
+    });
+
+    li.appendChild(header);
+    li.appendChild(body);
     return li;
 }
 

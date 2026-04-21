@@ -8,10 +8,14 @@ const state = {
     groups: [],
     yearSummary: null,
     monthSummary: null,
+    allTags: [],
+    tagSummary: [],
+    yearTagSummary: [],
     editingEntryId: null,     // null | 'new' | '<uuid>'
     editingRecurringId: null, // null | 'new' | '<uuid>'
     collapsedGroups: new Set(),
     collapsedRecurringGroups: new Set(),
+    collapsedTagGroups: new Set(),
     activeTab: 'entries',
 };
 

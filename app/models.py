@@ -19,6 +19,7 @@ class Entry(BaseModel):
     type: EntryType
     is_recurring: bool = False
     recurring_id: str | None = None
+    tags: list[str] = Field(default_factory=list)
 
 
 class RecurringItem(BaseModel):
@@ -54,6 +55,7 @@ class YearData(BaseModel):
     entries: list[Entry] = Field(default_factory=list)
     groups: list[Group] = Field(default_factory=list)
     recurring_groups: list[RecurringGroup] = Field(default_factory=list)
+    all_tags: list[str] = Field(default_factory=list)
 
 
 class CreateEntry(BaseModel):
@@ -62,6 +64,7 @@ class CreateEntry(BaseModel):
     category: str = ""
     description: str = ""
     type: EntryType
+    tags: list[str] = Field(default_factory=list)
 
 
 class CreateRecurring(BaseModel):

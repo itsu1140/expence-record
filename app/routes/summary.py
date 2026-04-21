@@ -83,6 +83,40 @@ def get_year_summary(year: int) -> dict:
     }
 
 
+@router.get("/{year}/tags")
+def get_tags(year: int) -> list[str]:
+    return load_year(year).all_tags
+
+
+@router.get("/{year}/month/{month}/tag-summary")
+def get_month_tag_summary(year: int, month: int) -> list[dict]:
+    data = load_year(year)
+    entries = [e for e in data.entries if e.date.month == month]
+    order: list[str] = []
+    totals: dict[str, dict] = {}
+    for entry in entries:
+        for tag in entry.tags:
+            if tag not in totals:
+                totals[tag] = {"income": 0, "expense": 0}
+                order.append(tag)
+            totals[tag][entry.type.value] += entry.amount
+    return [{"tag": t, **totals[t]} for t in order]
+
+
+@router.get("/{year}/tag-summary")
+def get_year_tag_summary(year: int) -> list[dict]:
+    data = load_year(year)
+    order: list[str] = []
+    totals: dict[str, dict] = {}
+    for entry in data.entries:
+        for tag in entry.tags:
+            if tag not in totals:
+                totals[tag] = {"income": 0, "expense": 0}
+                order.append(tag)
+            totals[tag][entry.type.value] += entry.amount
+    return [{"tag": t, **totals[t]} for t in order]
+
+
 @router.get("/{year}/month/{month}/summary")
 def get_month_summary(year: int, month: int) -> dict:
     data = load_year(year)

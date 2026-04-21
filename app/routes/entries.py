@@ -6,6 +6,12 @@ from app.storage import load_year, save_year
 router = APIRouter(prefix="/api/{year}/entries", tags=["entries"])
 
 
+def _sync_tags(data, tags):
+    for tag in tags:
+        if tag and tag not in data.all_tags:
+            data.all_tags.append(tag)
+
+
 @router.get("")
 def get_entries(year: int, month: int | None = None) -> list[Entry]:
     data = load_year(year)
@@ -20,6 +26,7 @@ def create_entry(year: int, body: CreateEntry) -> Entry:
     data = load_year(year)
     entry = Entry(**body.model_dump())
     data.entries.append(entry)
+    _sync_tags(data, entry.tags)
     save_year(data)
     return entry
 
@@ -31,6 +38,7 @@ def update_entry(year: int, entry_id: str, body: CreateEntry) -> Entry:
         if e.id == entry_id:
             updated = Entry(id=entry_id, **body.model_dump())
             data.entries[i] = updated
+            _sync_tags(data, updated.tags)
             save_year(data)
             return updated
     raise HTTPException(status_code=404, detail="Entry not found")
