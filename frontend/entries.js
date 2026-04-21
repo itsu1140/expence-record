@@ -361,7 +361,13 @@ function showTagPicker(anchor, pendingTags, onAdd) {
 
     document.body.appendChild(picker);
     const rect = anchor.getBoundingClientRect();
-    picker.style.top = `${rect.bottom + 4}px`;
+    const pickerH = picker.offsetHeight;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    if (spaceBelow < pickerH + 8 && rect.top > spaceBelow) {
+        picker.style.top = `${rect.top - pickerH - 4}px`;
+    } else {
+        picker.style.top = `${rect.bottom + 4}px`;
+    }
     picker.style.left = `${rect.left}px`;
 
     function closePicker() {
