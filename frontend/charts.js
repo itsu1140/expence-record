@@ -6,16 +6,23 @@ let chartTagMonthly = null;
 
 // ─── Tag Filter State ─────────────────────────────────────────────────────────
 let selectedChartTags = new Set();
+let chartTagFilterInitialized = false;
 
 function resetChartTagFilter() {
     selectedChartTags = new Set();
+    chartTagFilterInitialized = false;
 }
 
 function syncChartTagFilter() {
-    state.allTags.forEach((t) => selectedChartTags.add(t));
+    // Remove tags that no longer exist
     [...selectedChartTags].forEach((t) => {
         if (!state.allTags.includes(t)) selectedChartTags.delete(t);
     });
+    // On first load after reset, select all by default
+    if (!chartTagFilterInitialized) {
+        state.allTags.forEach((t) => selectedChartTags.add(t));
+        chartTagFilterInitialized = true;
+    }
 }
 
 function renderTagFilter() {
