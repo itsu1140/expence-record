@@ -859,6 +859,70 @@ body {
     border-color: var(--accent);
 }
 
+/* ── Tag Filter ───────────────────────────────────────────────────────────── */
+.tag-filter-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px 0 12px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+}
+
+.tag-filter-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tag-filter-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.tag-filter-bulk {
+    display: flex;
+    gap: 4px;
+}
+
+.tag-filter-bulk-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 11px;
+    padding: 2px 9px;
+    transition: border-color 0.1s, color 0.1s;
+}
+
+.tag-filter-bulk-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.tag-filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.tag-chip.tag-filter-chip {
+    cursor: pointer;
+    opacity: 0.3;
+    transition: opacity 0.12s;
+}
+
+.tag-chip.tag-filter-chip.active {
+    opacity: 1;
+}
+
+.tag-chip.tag-filter-chip:hover {
+    opacity: 0.7;
+}
+
 .chart-full {
     grid-column: 1 / -1;
 }
