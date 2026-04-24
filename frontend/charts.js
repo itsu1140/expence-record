@@ -1,4 +1,14 @@
 // ─── Charts ───────────────────────────────────────────────────────────────────
+const TAG_BAR_OPTIONS = {
+    indexAxis: "y",
+    responsive: true,
+    plugins: { legend: { labels: { color: "#e2e8f0", font: { size: 11 } } } },
+    scales: {
+        x: { ticks: { color: "#7c8db5", font: { size: 10 }, callback: (v) => v.toLocaleString() }, grid: { color: "#2e3347" } },
+        y: { ticks: { color: "#7c8db5", font: { size: 11 } }, grid: { color: "#2e3347" } },
+    },
+};
+
 let chartMonthly = null;
 let chartBreakdown = null;
 let chartTags = null;
@@ -112,36 +122,18 @@ function renderFilteredChart() {
     }
     if (noFilterMsg) noFilterMsg.style.display = "none";
 
-    const order = [];
-    const totals = {};
-    (state.allYearEntries || []).forEach((e) => {
-        if (!e.tags) return;
-        e.tags.forEach((tag) => {
-            if (!selectedChartTags.has(tag)) return;
-            if (!totals[tag]) { totals[tag] = { income: 0, expense: 0 }; order.push(tag); }
-            if (e.type === "income") totals[tag].income += e.amount;
-            else totals[tag].expense += e.amount;
-        });
-    });
+    const filtered = (state.yearTagSummary || []).filter((t) => selectedChartTags.has(t.tag));
 
     chartTagMonthly = new Chart(canvas, {
         type: "bar",
         data: {
-            labels: order,
+            labels: filtered.map((t) => t.tag),
             datasets: [
-                { label: "収入", data: order.map((t) => totals[t].income), backgroundColor: "rgba(74,222,128,0.7)", borderRadius: 3 },
-                { label: "支出", data: order.map((t) => totals[t].expense), backgroundColor: "rgba(248,113,113,0.7)", borderRadius: 3 },
+                { label: "収入", data: filtered.map((t) => t.income), backgroundColor: "rgba(74,222,128,0.7)", borderRadius: 3 },
+                { label: "支出", data: filtered.map((t) => t.expense), backgroundColor: "rgba(248,113,113,0.7)", borderRadius: 3 },
             ],
         },
-        options: {
-            indexAxis: "y",
-            responsive: true,
-            plugins: { legend: { labels: { color: "#e2e8f0", font: { size: 11 } } } },
-            scales: {
-                x: { ticks: { color: "#7c8db5", font: { size: 10 }, callback: (v) => v.toLocaleString() }, grid: { color: "#2e3347" } },
-                y: { ticks: { color: "#7c8db5", font: { size: 11 } }, grid: { color: "#2e3347" } },
-            },
-        },
+        options: TAG_BAR_OPTIONS,
     });
 }
 
@@ -190,7 +182,6 @@ function renderCharts() {
         });
     }
 
-    // Tag chart (current month)
     if (chartTags) chartTags.destroy();
     chartTags = null;
     const tagData = state.tagSummary ?? [];
@@ -206,21 +197,12 @@ function renderCharts() {
                     { label: "支出", data: tagData.map((t) => t.expense), backgroundColor: "rgba(248,113,113,0.7)", borderRadius: 3 },
                 ],
             },
-            options: {
-                indexAxis: "y",
-                responsive: true,
-                plugins: { legend: { labels: { color: "#e2e8f0", font: { size: 11 } } } },
-                scales: {
-                    x: { ticks: { color: "#7c8db5", font: { size: 10 }, callback: (v) => v.toLocaleString() }, grid: { color: "#2e3347" } },
-                    y: { ticks: { color: "#7c8db5", font: { size: 11 } }, grid: { color: "#2e3347" } },
-                },
-            },
+            options: TAG_BAR_OPTIONS,
         });
     } else {
         if (noTagsMsg) noTagsMsg.style.display = "";
     }
 
-    // Tag filter + filtered monthly chart (replacing year tag chart)
     renderTagFilter();
     renderFilteredChart();
 }

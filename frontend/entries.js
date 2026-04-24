@@ -317,7 +317,10 @@ function createTagsEditRow(pendingTags) {
     return row;
 }
 
+let _pickerCleanup = null;
+
 function showTagPicker(anchor, pendingTags, onAdd) {
+    if (_pickerCleanup) { _pickerCleanup(); _pickerCleanup = null; }
     document.querySelector(".tag-picker")?.remove();
 
     const picker = document.createElement("div");
@@ -373,6 +376,7 @@ function showTagPicker(anchor, pendingTags, onAdd) {
     function closePicker() {
         picker.remove();
         document.removeEventListener("mousedown", outsideClick);
+        _pickerCleanup = null;
         anchor.focus();
     }
 
@@ -383,6 +387,7 @@ function showTagPicker(anchor, pendingTags, onAdd) {
     }
 
     document.addEventListener("mousedown", outsideClick);
+    _pickerCleanup = closePicker;
     requestAnimationFrame(() => input.focus());
 }
 

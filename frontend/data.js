@@ -27,7 +27,7 @@ async function loadYearData() {
 }
 
 async function loadMonthData() {
-    const [entries, recurring, groups, recurringGroups, summary, allTags, tagSummary, yearTagSummary, allYearEntries] = await Promise.all([
+    const [entries, recurring, groups, recurringGroups, summary, allTags, tagSummary, yearTagSummary] = await Promise.all([
         api.get(`/api/${state.year}/entries?month=${state.month}`),
         api.get(`/api/${state.year}/recurring`),
         api.get(`/api/${state.year}/groups`),
@@ -36,7 +36,6 @@ async function loadMonthData() {
         api.get(`/api/${state.year}/tags`),
         api.get(`/api/${state.year}/month/${state.month}/tag-summary`),
         api.get(`/api/${state.year}/tag-summary`),
-        api.get(`/api/${state.year}/entries`),
     ]);
     state.entries = entries;
     state.recurring = recurring;
@@ -46,7 +45,6 @@ async function loadMonthData() {
     state.allTags = allTags;
     state.tagSummary = tagSummary;
     state.yearTagSummary = yearTagSummary;
-    state.allYearEntries = allYearEntries;
     state.editingEntryId = null;
     state.editingRecurringId = null;
     renderMonthHeader();
@@ -59,7 +57,7 @@ async function loadMonthData() {
 
 // Refresh current month view (keep editing state)
 async function refresh() {
-    const [entries, groups, yearSummary, monthSummary, allTags, tagSummary, yearTagSummary, allYearEntries] = await Promise.all([
+    const [entries, groups, yearSummary, monthSummary, allTags, tagSummary, yearTagSummary] = await Promise.all([
         api.get(`/api/${state.year}/entries?month=${state.month}`),
         api.get(`/api/${state.year}/groups`),
         api.get(`/api/${state.year}/summary`),
@@ -67,7 +65,6 @@ async function refresh() {
         api.get(`/api/${state.year}/tags`),
         api.get(`/api/${state.year}/month/${state.month}/tag-summary`),
         api.get(`/api/${state.year}/tag-summary`),
-        api.get(`/api/${state.year}/entries`),
     ]);
     state.entries = entries;
     state.groups = groups;
@@ -76,7 +73,6 @@ async function refresh() {
     state.allTags = allTags;
     state.tagSummary = tagSummary;
     state.yearTagSummary = yearTagSummary;
-    state.allYearEntries = allYearEntries;
     renderMonthHeader();
     renderEntries();
     renderSidebar();
@@ -85,7 +81,7 @@ async function refresh() {
 
 // Full refresh including recurring (used after undo/redo)
 async function hardRefresh() {
-    const [entries, recurring, groups, recurringGroups, yearSummary, monthSummary, allTags, tagSummary, yearTagSummary, allYearEntries] = await Promise.all([
+    const [entries, recurring, groups, recurringGroups, yearSummary, monthSummary, allTags, tagSummary, yearTagSummary] = await Promise.all([
         api.get(`/api/${state.year}/entries?month=${state.month}`),
         api.get(`/api/${state.year}/recurring`),
         api.get(`/api/${state.year}/groups`),
@@ -95,7 +91,6 @@ async function hardRefresh() {
         api.get(`/api/${state.year}/tags`),
         api.get(`/api/${state.year}/month/${state.month}/tag-summary`),
         api.get(`/api/${state.year}/tag-summary`),
-        api.get(`/api/${state.year}/entries`),
     ]);
     state.entries = entries;
     state.recurring = recurring;
@@ -106,7 +101,6 @@ async function hardRefresh() {
     state.allTags = allTags;
     state.tagSummary = tagSummary;
     state.yearTagSummary = yearTagSummary;
-    state.allYearEntries = allYearEntries;
     renderMonthHeader();
     renderEntries();
     renderRecurring();
