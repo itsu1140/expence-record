@@ -1,5 +1,6 @@
 services:
   app:
+    image: expence-record:latest
     build: .
     ports:
       - "50001:50001"
