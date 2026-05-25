@@ -16,6 +16,7 @@ async function loadYearList() {
 }
 
 async function loadYearData() {
+    await api.post(`/api/${state.year}/recurring/inherit`, {});
     const [summary, stateData] = await Promise.all([
         api.get(`/api/${state.year}/summary`),
         api.get(`/api/${state.year}/state`),

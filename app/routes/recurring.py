@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
 from app.models import CreateRecurring, RecurringItem
-from app.storage import load_year, save_year
+from app.storage import get_data_path, load_year, save_year
 
 
 # Helper to check if month is in the valid range of a recurring item
@@ -10,6 +10,35 @@ def _in_range(r: RecurringItem, month: int) -> bool:
 
 
 router = APIRouter(prefix="/api/{year}/recurring", tags=["recurring"])
+
+
+@router.post("/inherit")
+def inherit_recurring(year: int) -> list[RecurringItem]:
+    data = load_year(year)
+    if data.recurring:
+        return data.recurring
+    prev_path = get_data_path(year - 1)
+    if not prev_path.exists():
+        return []
+    prev_data = load_year(year - 1)
+    active = [r for r in prev_data.recurring if r.active]
+    if not active:
+        return []
+    new_items = [
+        RecurringItem(
+            name=r.name,
+            amount=r.amount,
+            category=r.category,
+            type=r.type,
+            active=True,
+            start_month=1,
+            end_month=None,
+        )
+        for r in active
+    ]
+    data.recurring = new_items
+    save_year(data)
+    return new_items
 
 
 @router.get("")
