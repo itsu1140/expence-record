@@ -194,6 +194,7 @@ function createEntryEditCard(entry) {
     const amountInput = document.createElement("input");
     amountInput.className = "edit-amount";
     amountInput.type = "number";
+    amountInput.inputMode = "numeric";
     amountInput.min = "1";
     amountInput.placeholder = "金額";
     amountInput.value = entry?.amount || "";
@@ -260,7 +261,13 @@ function createEntryEditCard(entry) {
         if (e.relatedTarget === cancelBtn) return;
         if (e.relatedTarget === saveBtn) return;
         if (document.querySelector(".tag-picker")) return;
-        save();
+        // モバイルでは relatedTarget が null になるため、click/touchend が
+        // 処理される時間を確保してからピッカーの有無を再確認する
+        setTimeout(() => {
+            if (document.querySelector(".tag-picker")) return;
+            if (document.activeElement && li.contains(document.activeElement)) return;
+            save();
+        }, 150);
     });
 
     if (!entry) setTimeout(() => descInput.focus(), 30);
@@ -335,7 +342,7 @@ function showTagPicker(anchor, pendingTags, onAdd) {
             btn.type = "button";
             btn.className = "tag-chip";
             btn.textContent = tag;
-            btn.addEventListener("mousedown", (e) => {
+            btn.addEventListener("pointerdown", (e) => {
                 e.preventDefault();
                 onAdd(tag);
                 closePicker();
@@ -375,7 +382,7 @@ function showTagPicker(anchor, pendingTags, onAdd) {
 
     function closePicker() {
         picker.remove();
-        document.removeEventListener("mousedown", outsideClick);
+        document.removeEventListener("pointerdown", outsideClick);
         _pickerCleanup = null;
         anchor.focus();
     }
@@ -386,7 +393,7 @@ function showTagPicker(anchor, pendingTags, onAdd) {
         }
     }
 
-    document.addEventListener("mousedown", outsideClick);
+    document.addEventListener("pointerdown", outsideClick);
     _pickerCleanup = closePicker;
     requestAnimationFrame(() => input.focus());
 }
