@@ -178,6 +178,7 @@ function renderCharts() {
             options: {
                 indexAxis: "y",
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
                     x: { ticks: { color: "#7c8db5", font: { size: 10 }, callback: (v) => v.toLocaleString() }, grid: { color: "#2e3347" } },
