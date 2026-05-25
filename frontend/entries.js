@@ -335,21 +335,22 @@ function showTagPicker(anchor, pendingTags, onAdd) {
 
     const available = state.allTags.filter((t) => !pendingTags.includes(t));
     if (available.length > 0) {
-        const list = document.createElement("div");
-        list.className = "tag-picker-list";
+        const sel = document.createElement("select");
+        sel.className = "tag-picker-select";
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "タグを選択...";
+        sel.appendChild(placeholder);
         available.forEach((tag) => {
-            const btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "tag-chip";
-            btn.textContent = tag;
-            btn.addEventListener("pointerdown", (e) => {
-                e.preventDefault();
-                onAdd(tag);
-                closePicker();
-            });
-            list.appendChild(btn);
+            const opt = document.createElement("option");
+            opt.value = tag;
+            opt.textContent = tag;
+            sel.appendChild(opt);
         });
-        picker.appendChild(list);
+        sel.addEventListener("change", () => {
+            if (sel.value) { onAdd(sel.value); closePicker(); }
+        });
+        picker.appendChild(sel);
     }
 
     const input = document.createElement("input");

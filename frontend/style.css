@@ -830,18 +830,20 @@ body {
     gap: 6px;
 }
 
-.tag-picker-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-}
-
-.tag-picker-list .tag-chip {
+.tag-picker-select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    padding: 4px 8px;
+    font-size: 12px;
+    width: 100%;
     cursor: pointer;
 }
 
-.tag-picker-list .tag-chip:hover {
-    background: color-mix(in srgb, var(--accent) 32%, transparent);
+.tag-picker-select:focus {
+    outline: none;
+    border-color: var(--accent);
 }
 
 .tag-picker-input {
