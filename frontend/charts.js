@@ -10,6 +10,7 @@ const TAG_BAR_OPTIONS = {
 };
 
 let chartMonthly = null;
+let chartCumulative = null;
 let chartBreakdown = null;
 let chartTags = null;
 let chartTagMonthly = null;
@@ -158,6 +159,33 @@ function renderCharts() {
             },
         },
     });
+
+    if (chartCumulative) chartCumulative.destroy();
+    {
+        let cum = 0;
+        const cumulativeData = monthly.map((m) => { cum += m.income - m.expense; return cum; });
+        chartCumulative = new Chart(document.getElementById("chart-cumulative"), {
+            type: "bar",
+            data: {
+                labels: monthly.map((m) => MONTHS[m.month - 1]),
+                datasets: [{
+                    label: "累積収支",
+                    data: cumulativeData,
+                    backgroundColor: cumulativeData.map((v) => v >= 0 ? "rgba(74,222,128,0.7)" : "rgba(248,113,113,0.7)"),
+                    borderRadius: 3,
+                }],
+            },
+            options: {
+                indexAxis: "y",
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: "#7c8db5", font: { size: 10 }, callback: (v) => v.toLocaleString() }, grid: { color: "#2e3347" } },
+                    y: { ticks: { color: "#7c8db5", font: { size: 10 } }, grid: { color: "#2e3347" } },
+                },
+            },
+        });
+    }
 
     const s = state.monthSummary;
     if (chartBreakdown) chartBreakdown.destroy();
