@@ -137,10 +137,23 @@ function createRecurringEditCard(item) {
 
     const amountInput = document.createElement("input");
     amountInput.className = "edit-amount";
-    amountInput.type = "number";
-    amountInput.min = "1";
+    amountInput.type = "text";
+    amountInput.inputMode = "decimal";
     amountInput.placeholder = "金額";
-    amountInput.value = item?.amount || "";
+    let amountFormula = item?.amount ? String(item.amount) : "";
+    amountInput.value = item?.amount ? item.amount.toLocaleString() : "";
+
+    amountInput.addEventListener("focus", () => {
+        amountInput.value = amountFormula;
+        setTimeout(() => amountInput.select(), 0);
+    });
+    amountInput.addEventListener("input", () => {
+        amountFormula = amountInput.value;
+    });
+    amountInput.addEventListener("blur", () => {
+        const result = evalFormula(amountFormula);
+        if (result !== null && result > 0) amountInput.value = result.toLocaleString();
+    });
     row.appendChild(amountInput);
 
     const saveBtn = document.createElement("button");
@@ -161,7 +174,7 @@ function createRecurringEditCard(item) {
     const save = async () => {
         if (saving) return;
         saving = true;
-        const amount = parseInt(amountInput.value, 10);
+        const amount = evalFormula(amountFormula);
         if (!amount || amount <= 0) {
             saving = false;
             amountInput.classList.add("input-error");

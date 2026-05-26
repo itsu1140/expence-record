@@ -159,6 +159,55 @@ function createEntryViewCard(entry) {
     return li;
 }
 
+function evalFormula(str) {
+    const s = str.replace(/[\s,]/g, "");
+    if (!s) return null;
+    let pos = 0;
+
+    function parseExpr() {
+        let v = parseTerm();
+        while (pos < s.length && (s[pos] === "+" || s[pos] === "-")) {
+            const op = s[pos++];
+            v = op === "+" ? v + parseTerm() : v - parseTerm();
+        }
+        return v;
+    }
+    function parseTerm() {
+        let v = parseUnary();
+        while (pos < s.length && (s[pos] === "*" || s[pos] === "/")) {
+            const op = s[pos++];
+            const r = parseUnary();
+            v = op === "*" ? v * r : v / r;
+        }
+        return v;
+    }
+    function parseUnary() {
+        if (s[pos] === "-") { pos++; return -parseFactor(); }
+        if (s[pos] === "+") { pos++; return parseFactor(); }
+        return parseFactor();
+    }
+    function parseFactor() {
+        if (s[pos] === "(") {
+            pos++;
+            const v = parseExpr();
+            if (s[pos] === ")") pos++;
+            return v;
+        }
+        return parseNum();
+    }
+    function parseNum() {
+        let n = "";
+        while (pos < s.length && /[\d.]/.test(s[pos])) n += s[pos++];
+        return n ? parseFloat(n) : NaN;
+    }
+
+    try {
+        const result = parseExpr();
+        if (pos !== s.length || isNaN(result) || !isFinite(result)) return null;
+        return Math.round(result);
+    } catch { return null; }
+}
+
 function createEntryEditCard(entry) {
     const li = document.createElement("li");
     li.className = "entry-card editing";
@@ -193,11 +242,23 @@ function createEntryEditCard(entry) {
 
     const amountInput = document.createElement("input");
     amountInput.className = "edit-amount";
-    amountInput.type = "number";
-    amountInput.inputMode = "numeric";
-    amountInput.min = "1";
+    amountInput.type = "text";
+    amountInput.inputMode = "decimal";
     amountInput.placeholder = "金額";
-    amountInput.value = entry?.amount || "";
+    let amountFormula = entry?.amount ? String(entry.amount) : "";
+    amountInput.value = entry?.amount ? entry.amount.toLocaleString() : "";
+
+    amountInput.addEventListener("focus", () => {
+        amountInput.value = amountFormula;
+        setTimeout(() => amountInput.select(), 0);
+    });
+    amountInput.addEventListener("input", () => {
+        amountFormula = amountInput.value;
+    });
+    amountInput.addEventListener("blur", () => {
+        const result = evalFormula(amountFormula);
+        if (result !== null && result > 0) amountInput.value = result.toLocaleString();
+    });
     row.appendChild(amountInput);
 
     const saveBtn = document.createElement("button");
@@ -219,7 +280,7 @@ function createEntryEditCard(entry) {
     const save = async () => {
         if (saving) return;
         saving = true;
-        const amount = parseInt(amountInput.value, 10);
+        const amount = evalFormula(amountFormula);
         if (!amount || amount <= 0) {
             saving = false;
             amountInput.classList.add("input-error");
