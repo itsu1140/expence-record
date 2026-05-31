@@ -17,14 +17,12 @@ async function loadYearList() {
 
 async function loadYearData() {
     await api.post(`/api/${state.year}/recurring/inherit`, {});
-    const [summary, stateData, tagHierarchy] = await Promise.all([
+    const [summary, stateData] = await Promise.all([
         api.get(`/api/${state.year}/summary`),
         api.get(`/api/${state.year}/state`),
-        api.get(`/api/${state.year}/tag-hierarchy`),
     ]);
     state.yearSummary = summary;
     state.month = stateData.last_opened_month;
-    state.tagHierarchy = tagHierarchy;
     resetChartTagFilter();
     renderSidebar();
 }

@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from app.models import UpdateState, YearData
-from app.storage import list_years, load_year, save_year
+from app.storage import list_years, load_config, load_year, save_config, save_year
 
 router = APIRouter(prefix="/api", tags=["summary"])
 
@@ -88,16 +88,28 @@ def get_tags(year: int) -> list[str]:
     return load_year(year).all_tags
 
 
-@router.get("/{year}/tag-hierarchy")
-def get_tag_hierarchy(year: int) -> dict:
-    return load_year(year).tag_hierarchy
+@router.get("/all-tags")
+def get_all_tags() -> list[str]:
+    seen: set[str] = set()
+    result: list[str] = []
+    for year in list_years():
+        for tag in load_year(year).all_tags:
+            if tag not in seen:
+                seen.add(tag)
+                result.append(tag)
+    return result
 
 
-@router.put("/{year}/tag-hierarchy")
-def update_tag_hierarchy(year: int, hierarchy: dict) -> dict:
-    data = load_year(year)
-    data.tag_hierarchy = hierarchy
-    save_year(data)
+@router.get("/tag-hierarchy")
+def get_tag_hierarchy() -> dict:
+    return load_config().get("tag_hierarchy", {})
+
+
+@router.put("/tag-hierarchy")
+def update_tag_hierarchy(hierarchy: dict) -> dict:
+    config = load_config()
+    config["tag_hierarchy"] = hierarchy
+    save_config(config)
     return hierarchy
 
 

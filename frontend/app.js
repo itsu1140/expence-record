@@ -116,6 +116,8 @@ async function init() {
     document.getElementById("add-entry-btn").textContent = "+ 追加 (N)";
     document.getElementById("add-recurring-btn").textContent = "+ 追加 (N)";
 
+    state.tagHierarchy = await api.get("/api/tag-hierarchy");
+
     await loadYearList();
     await loadYearData();
     await loadMonthData();

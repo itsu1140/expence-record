@@ -12,12 +12,13 @@ function hasCycle(hierarchy) {
     return false;
 }
 
-function renderTagHierarchySettings() {
+async function renderTagHierarchySettings() {
     const container = document.getElementById("hierarchy-settings");
     if (!container) return;
     container.innerHTML = "";
 
-    if (state.allTags.length === 0) {
+    const allTags = await api.get("/api/all-tags");
+    if (allTags.length === 0) {
         const empty = document.createElement("p");
         empty.className = "settings-empty";
         empty.textContent = "タグが設定された明細がありません";
@@ -28,7 +29,7 @@ function renderTagHierarchySettings() {
     const table = document.createElement("div");
     table.className = "hierarchy-table";
 
-    state.allTags.forEach((tag) => {
+    allTags.forEach((tag) => {
         const row = document.createElement("div");
         row.className = "hierarchy-row";
 
@@ -51,7 +52,7 @@ function renderTagHierarchySettings() {
         noneOpt.textContent = "（なし）";
         sel.appendChild(noneOpt);
 
-        state.allTags.filter((t) => t !== tag).forEach((t) => {
+        allTags.filter((t) => t !== tag).forEach((t) => {
             const opt = document.createElement("option");
             opt.value = t;
             opt.textContent = t;
@@ -68,25 +69,6 @@ function renderTagHierarchySettings() {
     const actions = document.createElement("div");
     actions.className = "settings-actions";
 
-    const inheritBtn = document.createElement("button");
-    inheritBtn.className = "btn btn-ghost";
-    inheritBtn.textContent = "前年から引き継ぐ";
-    inheritBtn.addEventListener("click", async () => {
-        const prevHierarchy = await api.get(`/api/${state.year - 1}/tag-hierarchy`).catch(() => ({}));
-        if (!prevHierarchy || Object.keys(prevHierarchy).length === 0) {
-            inheritBtn.textContent = "前年の設定なし";
-            setTimeout(() => { inheritBtn.textContent = "前年から引き継ぐ"; }, 1500);
-            return;
-        }
-        container.querySelectorAll(".hierarchy-parent-select").forEach((s) => {
-            const parent = prevHierarchy[s.dataset.tag];
-            s.value = parent || "";
-        });
-        inheritBtn.textContent = "反映済み（保存してください）";
-        setTimeout(() => { inheritBtn.textContent = "前年から引き継ぐ"; }, 2000);
-    });
-    actions.appendChild(inheritBtn);
-
     const saveBtn = document.createElement("button");
     saveBtn.className = "btn btn-primary";
     saveBtn.textContent = "保存";
@@ -99,7 +81,7 @@ function renderTagHierarchySettings() {
             alert("循環参照が検出されました。親子関係を確認してください。");
             return;
         }
-        state.tagHierarchy = await api.put(`/api/${state.year}/tag-hierarchy`, hierarchy);
+        state.tagHierarchy = await api.put("/api/tag-hierarchy", hierarchy);
         saveBtn.textContent = "保存済み ✓";
         setTimeout(() => { saveBtn.textContent = "保存"; }, 1500);
     });
