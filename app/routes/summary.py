@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.models import UpdateState, YearData
+from app.models import RenameTag, UpdateState, YearData
 from app.storage import list_years, load_config, load_year, save_config, save_year
 
 router = APIRouter(prefix="/api", tags=["summary"])
@@ -111,6 +111,32 @@ def update_tag_hierarchy(hierarchy: dict) -> dict:
     config["tag_hierarchy"] = hierarchy
     save_config(config)
     return hierarchy
+
+
+@router.put("/tag/rename", status_code=204)
+def rename_tag(body: RenameTag) -> None:
+    if not body.new_name or body.old_name == body.new_name:
+        return
+    for year in list_years():
+        data = load_year(year)
+        changed = False
+        for entry in data.entries:
+            if body.old_name in entry.tags:
+                entry.tags = [body.new_name if t == body.old_name else t for t in entry.tags]
+                changed = True
+        if body.old_name in data.all_tags:
+            data.all_tags = [body.new_name if t == body.old_name else t for t in data.all_tags]
+            changed = True
+        if changed:
+            save_year(data)
+    config = load_config()
+    hierarchy = config.get("tag_hierarchy", {})
+    if any(k == body.old_name or v == body.old_name for k, v in hierarchy.items()):
+        config["tag_hierarchy"] = {
+            (body.new_name if k == body.old_name else k): (body.new_name if v == body.old_name else v)
+            for k, v in hierarchy.items()
+        }
+        save_config(config)
 
 
 def _aggregate_tags(entries) -> list[dict]:

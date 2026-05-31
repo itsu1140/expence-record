@@ -17,7 +17,7 @@ async function renderTagHierarchySettings() {
     if (!container) return;
     container.innerHTML = "";
 
-    const allTags = await api.get("/api/all-tags");
+    const allTags = (await api.get("/api/all-tags")).sort();
     if (allTags.length === 0) {
         const empty = document.createElement("p");
         empty.className = "settings-empty";
@@ -33,10 +33,45 @@ async function renderTagHierarchySettings() {
         const row = document.createElement("div");
         row.className = "hierarchy-row";
 
-        const chip = document.createElement("span");
-        chip.className = "tag-chip hierarchy-tag-label";
-        chip.textContent = tag;
-        row.appendChild(chip);
+        const nameInput = document.createElement("input");
+        nameInput.className = "hierarchy-tag-input";
+        nameInput.value = tag;
+        nameInput.dataset.original = tag;
+
+        async function applyRename() {
+            const newName = nameInput.value.trim();
+            const oldName = nameInput.dataset.original;
+            if (!newName) { nameInput.value = oldName; return; }
+            if (newName === oldName) return;
+            try {
+                await api.put("/api/tag/rename", { old_name: oldName, new_name: newName });
+            } catch {
+                nameInput.value = oldName;
+                return;
+            }
+            nameInput.dataset.original = newName;
+            // update all selector options and data-tag attributes in-place
+            container.querySelectorAll(".hierarchy-parent-select").forEach((s) => {
+                if (s.dataset.tag === oldName) s.dataset.tag = newName;
+                Array.from(s.options).forEach((opt) => {
+                    if (opt.value === oldName) { opt.value = newName; opt.textContent = newName; }
+                });
+                if (s.value === oldName) s.value = newName;
+            });
+            // update state
+            state.allTags = state.allTags.map((t) => t === oldName ? newName : t);
+            const h = state.tagHierarchy;
+            if (h[oldName]) { h[newName] = h[oldName]; delete h[oldName]; }
+            Object.keys(h).forEach((k) => { if (h[k] === oldName) h[k] = newName; });
+        }
+
+        nameInput.addEventListener("blur", applyRename);
+        nameInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") { e.preventDefault(); nameInput.blur(); }
+            if (e.key === "Escape") { nameInput.value = nameInput.dataset.original; nameInput.blur(); }
+        });
+
+        row.appendChild(nameInput);
 
         const arrow = document.createElement("span");
         arrow.className = "hierarchy-arrow";

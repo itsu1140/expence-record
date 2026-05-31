@@ -1134,6 +1134,22 @@ body {
   text-align: center;
 }
 
+.hierarchy-tag-input {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  font-size: 12px;
+  padding: 3px 8px;
+  width: 120px;
+  transition: border-color 0.15s;
+}
+
+.hierarchy-tag-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
 .hierarchy-arrow {
   font-size: 11px;
   color: var(--text-muted);

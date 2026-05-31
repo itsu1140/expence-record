@@ -102,3 +102,8 @@ class ReorderIds(BaseModel):
 class UpdateState(BaseModel):
     last_opened_month: int | None = None
     initial_balance: int | None = None
+
+
+class RenameTag(BaseModel):
+    old_name: str
+    new_name: str

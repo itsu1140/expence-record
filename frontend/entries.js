@@ -411,7 +411,7 @@ function showTagPicker(anchor, pendingTags, onAdd) {
     const picker = document.createElement("div");
     picker.className = "tag-picker";
 
-    const available = state.allTags.filter((t) => !pendingTags.includes(t));
+    const available = state.allTags.filter((t) => !pendingTags.includes(t)).sort();
     if (available.length > 0) {
         const sel = document.createElement("select");
         sel.className = "tag-picker-select";
