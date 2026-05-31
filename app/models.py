@@ -56,6 +56,7 @@ class YearData(BaseModel):
     groups: list[Group] = Field(default_factory=list)
     recurring_groups: list[RecurringGroup] = Field(default_factory=list)
     all_tags: list[str] = Field(default_factory=list)
+    tag_hierarchy: dict[str, str] = Field(default_factory=dict)
 
 
 class CreateEntry(BaseModel):

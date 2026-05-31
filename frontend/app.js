@@ -78,6 +78,7 @@ function switchTab(tabName) {
     document.querySelector(`[data-tab="${tabName}"]`).classList.add("active");
     document.getElementById(`tab-${tabName}`).classList.add("active");
     if (tabName === "charts") renderCharts();
+    if (tabName === "settings") renderTagHierarchySettings();
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────

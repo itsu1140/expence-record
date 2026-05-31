@@ -34,6 +34,7 @@
           <button class="tab-btn active" data-tab="entries">明細</button>
           <button class="tab-btn" data-tab="recurring">固定費</button>
           <button class="tab-btn" data-tab="charts">グラフ</button>
+          <button class="tab-btn" data-tab="settings">設定</button>
         </div>
 
         <div id="tab-entries" class="tab-content active">
@@ -77,6 +78,13 @@
             </div>
           </div>
         </div>
+        <div id="tab-settings" class="tab-content">
+          <div class="settings-section">
+            <h3 class="settings-title">タグ階層設定</h3>
+            <p class="settings-desc">サブクラスのタグを追加すると親タグが自動的に付与されます。グルーピングはサブクラス側が優先されます。</p>
+            <div id="hierarchy-settings"></div>
+          </div>
+        </div>
       </main>
     </div>
   </div>
@@ -89,6 +97,7 @@
   <script src="__ROOT_PATH__/static/entries.js"></script>
   <script src="__ROOT_PATH__/static/recurring.js"></script>
   <script src="__ROOT_PATH__/static/charts.js"></script>
+  <script src="__ROOT_PATH__/static/tag-hierarchy.js"></script>
   <script src="__ROOT_PATH__/static/app.js"></script>
 </body>
 </html>

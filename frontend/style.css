@@ -1091,3 +1091,74 @@ body {
   background: var(--border);
   border-radius: 3px;
 }
+/* ── Settings Tab ─────────────────────────────────────────────────────────── */
+.settings-section {
+  padding: 20px 0;
+  max-width: 600px;
+}
+
+.settings-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.settings-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.settings-empty {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.hierarchy-table {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.hierarchy-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hierarchy-tag-label {
+  min-width: 100px;
+  text-align: center;
+}
+
+.hierarchy-arrow {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.hierarchy-parent-select {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  min-width: 140px;
+}
+
+.hierarchy-parent-select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.settings-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}

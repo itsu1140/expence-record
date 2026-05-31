@@ -88,6 +88,19 @@ def get_tags(year: int) -> list[str]:
     return load_year(year).all_tags
 
 
+@router.get("/{year}/tag-hierarchy")
+def get_tag_hierarchy(year: int) -> dict:
+    return load_year(year).tag_hierarchy
+
+
+@router.put("/{year}/tag-hierarchy")
+def update_tag_hierarchy(year: int, hierarchy: dict) -> dict:
+    data = load_year(year)
+    data.tag_hierarchy = hierarchy
+    save_year(data)
+    return hierarchy
+
+
 def _aggregate_tags(entries) -> list[dict]:
     order: list[str] = []
     totals: dict[str, dict] = {}

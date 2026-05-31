@@ -335,6 +335,20 @@ function createEntryEditCard(entry) {
     return li;
 }
 
+// ─── Tag Hierarchy Helpers ────────────────────────────────────────────────────
+function getTagAncestors(tag) {
+    const ancestors = [];
+    let cur = tag;
+    const seen = new Set([tag]);
+    while (state.tagHierarchy[cur]) {
+        cur = state.tagHierarchy[cur];
+        if (seen.has(cur)) break;
+        seen.add(cur);
+        ancestors.push(cur);
+    }
+    return ancestors;
+}
+
 // ─── Tag Edit UI ──────────────────────────────────────────────────────────────
 function createTagsEditRow(pendingTags) {
     const row = document.createElement("div");
@@ -376,6 +390,9 @@ function createTagsEditRow(pendingTags) {
         showTagPicker(addBtn, pendingTags, (tag) => {
             if (tag && !pendingTags.includes(tag)) {
                 pendingTags.push(tag);
+                getTagAncestors(tag).forEach((parent) => {
+                    if (!pendingTags.includes(parent)) pendingTags.push(parent);
+                });
                 renderChips();
             }
         });

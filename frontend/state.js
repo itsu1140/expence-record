@@ -11,6 +11,7 @@ const state = {
     allTags: [],
     tagSummary: [],
     yearTagSummary: [],
+    tagHierarchy: {},
     editingEntryId: null,     // null | 'new' | '<uuid>'
     editingRecurringId: null, // null | 'new' | '<uuid>'
     collapsedGroups: new Set(),
